@@ -19,7 +19,7 @@ export const getPortalData = async (req: Request, res: Response) => {
     const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
     const isExpired = restaurant.paymentStatus !== 'completed' && new Date() > restaurant.subscriptionExpiryDate;
     if (restaurant.status === 'disabled' || (!isDev && isExpired)) {
-      return res.status(403).json({ message: 'Restaurant is temporarily unavailable.' });
+      return res.status(403).json({ message: 'This restaurant is temporarily unavailable.' });
     }
 
     // Get Active Categories
@@ -95,7 +95,7 @@ export const createCheckoutOrder = async (req: Request, res: Response) => {
     const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
     const isExpired = restaurant.paymentStatus !== 'completed' && new Date() > restaurant.subscriptionExpiryDate;
     if (restaurant.status === 'disabled' || (!isDev && isExpired)) {
-      return res.status(403).json({ message: 'Restaurant is temporarily unavailable.' });
+      return res.status(403).json({ message: 'This restaurant is temporarily unavailable.' });
     }
 
     const calculatedItems = [];

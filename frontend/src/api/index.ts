@@ -30,10 +30,10 @@ api.interceptors.response.use(
       // 401: Unauthorized / expired
       // 403: Forbidden (e.g., Disabled User or Restaurant)
       if (status === 401 || status === 403) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        // Redirect to login page if we are not already there
-        if (!window.location.pathname.startsWith('/login') && window.location.pathname !== '/') {
+        const isAuthRoute = window.location.pathname.startsWith('/super-admin') || window.location.pathname.startsWith('/restaurant-admin');
+        if (isAuthRoute) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
           window.location.href = `/login?reason=${encodeURIComponent(
             error.response.data?.message || 'Session expired or account deactivated'
           )}`;

@@ -8,6 +8,8 @@ import { Category } from '../models/Category';
 import { Product } from '../models/Product';
 import { Order } from '../models/Order';
 import { SmsLog } from '../models/SmsLog';
+import { DailyAnalytics } from '../models/DailyAnalytics';
+import { ProductSales } from '../models/ProductSales';
 import { smsService } from '../services/smsService';
 import { storageService } from '../services/storageService';
 import { slugify } from '../utils/slugify';
@@ -241,6 +243,16 @@ export const createRestaurant = async (req: Request, res: Response) => {
       status: 'active',
     });
 
+    // Create initial daily analytics for today
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    await DailyAnalytics.create({
+      restaurantId: newRestaurant._id,
+      date: startOfToday,
+      sales: 0,
+      ordersCount: 0
+    });
+
     return res.status(201).json({
       message: 'Restaurant created successfully',
       restaurant: newRestaurant,
@@ -332,6 +344,8 @@ export const deleteRestaurant = async (req: Request, res: Response) => {
     await Order.deleteMany({ restaurantId: id });
     await User.deleteMany({ restaurant: id });
     await Alert.deleteMany({ restaurantId: id });
+    await DailyAnalytics.deleteMany({ restaurantId: id });
+    await ProductSales.deleteMany({ restaurantId: id });
     await Restaurant.findByIdAndDelete(id);
 
     return res.status(200).json({ message: 'Restaurant and all associated data permanently deleted.' });

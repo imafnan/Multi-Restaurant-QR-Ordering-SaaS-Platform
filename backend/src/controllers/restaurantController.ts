@@ -330,6 +330,8 @@ export const deleteProduct = async (req: AuthRequest, res: Response) => {
     }
 
     await Product.findByIdAndDelete(id);
+    // Clean up ProductSales records to prevent orphan data
+    await ProductSales.deleteMany({ productId: id });
     return res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Delete product error:', error);
