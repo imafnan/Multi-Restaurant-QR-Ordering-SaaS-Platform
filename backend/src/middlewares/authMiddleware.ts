@@ -30,14 +30,20 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
       return res.status(403).json({ message: 'User account is disabled' });
     }
 
-    // Check if restaurant is disabled (for restaurant admins)
+    // Check if restaurant is disabled or subscription expired (for restaurant admins)
     if (user.role === 'restaurant_admin' && user.restaurant) {
       const restaurant = await Restaurant.findById(user.restaurant);
       if (!restaurant) {
         return res.status(401).json({ message: 'Restaurant not found' });
       }
       if (restaurant.status === 'disabled') {
-        return res.status(403).json({ message: 'Restaurant is disabled' });
+        return res.status(403).json({ message: 'Restaurant is deactivated by Super Admin' });
+      }
+      
+      const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+      const isExpired = restaurant.paymentStatus !== 'completed' && new Date() > restaurant.subscriptionExpiryDate;
+      if (!isDev && isExpired) {
+        return res.status(403).json({ message: 'Restaurant subscription has expired or is unpaid' });
       }
       req.restaurantId = restaurant.id;
     }

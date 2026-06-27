@@ -17,5 +17,10 @@ const RestaurantSchema = new mongoose_1.Schema({
     paymentStatus: { type: String, enum: ['pending', 'completed'], default: 'pending' },
     paymentMethod: { type: String },
     paymentDate: { type: Date },
+    logo: { type: String, default: '' },
+    banner: { type: String, default: '' },
+    vatPercentage: { type: Number, default: 0 },
+    subscriptionStatus: { type: String, enum: ['active', 'pending_payment', 'expired'], default: 'pending_payment' },
+    subscriptionExpiryDate: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
 }, { timestamps: true });
 exports.Restaurant = (0, mongoose_1.model)('Restaurant', RestaurantSchema);

@@ -69,3 +69,60 @@ export interface DashboardStats {
   netProfit: number;
   totalVisitors: number;
 }
+
+export interface Variant {
+  name: string;
+  price: number;
+  discountPrice?: number;
+}
+
+export interface Category {
+  _id: string;
+  restaurantId: string;
+  name: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Product {
+  _id: string;
+  restaurantId: string;
+  categoryId: string | { _id: string; name: string };
+  name: string;
+  description?: string;
+  price: number;
+  discountPrice?: number;
+  image?: string;
+  images: string[];
+  status: 'active' | 'inactive';
+  quantity?: number;
+  variants: Variant[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderItem {
+  productId: string;
+  name: string;
+  variantName?: string;
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  _id: string;
+  restaurantId: string;
+  orderId: string;
+  fullName: string;
+  phone: string;
+  tableNumber: string;
+  items: OrderItem[];
+  subtotal: number;
+  vat: number;
+  grandTotal: number;
+  status: 'pending' | 'accepted' | 'completed' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+}
+

@@ -10,11 +10,11 @@ export const NoticeBox: React.FC = () => {
 
   const fetchLogs = async () => {
     try {
-      // In development, the SMS logs endpoint can be queried
-      const res = await api.get('/super-admin/sms/logs');
+      // In development, query the latest SMS log endpoint
+      const res = await api.get('/auth/sms/latest');
       setLogs(res.data);
     } catch (err) {
-      // Ignore unauthorized errors (e.g. before logging in)
+      // Ignore errors
     }
   };
 

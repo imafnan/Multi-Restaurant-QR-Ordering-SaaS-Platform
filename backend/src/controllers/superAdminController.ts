@@ -220,6 +220,15 @@ export const createRestaurant = async (req: Request, res: Response) => {
       tradeLicenseImage,
       status: 'active',
       paymentStatus: 'pending',
+      subscriptionStatus: 'pending_payment',
+      subscriptionExpiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days trial/grace period
+    });
+
+    // Create default category
+    await Category.create({
+      restaurantId: newRestaurant._id,
+      name: 'Uncategorized',
+      status: 'active'
     });
 
     // Create Restaurant Admin User
@@ -387,6 +396,8 @@ export const updatePaymentStatus = async (req: Request, res: Response) => {
     restaurant.paymentStatus = 'completed';
     restaurant.paymentMethod = paymentMethod;
     restaurant.paymentDate = new Date();
+    restaurant.subscriptionStatus = 'active';
+    restaurant.subscriptionExpiryDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Extended by 30 days
     await restaurant.save();
 
     return res.status(200).json({

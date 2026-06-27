@@ -8,6 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const superAdminRoutes_1 = __importDefault(require("./routes/superAdminRoutes"));
+const restaurantRoutes_1 = __importDefault(require("./routes/restaurantRoutes"));
 const app = (0, express_1.default)();
 // CORS Configuration
 const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -22,6 +23,7 @@ app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../
 // Routes
 app.use('/api/auth', authRoutes_1.default);
 app.use('/api/super-admin', superAdminRoutes_1.default);
+app.use('/api/restaurant', restaurantRoutes_1.default);
 // Base route
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'QR Ordering SaaS Platform API' });
