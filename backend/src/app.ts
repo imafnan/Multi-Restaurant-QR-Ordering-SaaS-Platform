@@ -4,6 +4,7 @@ import path from 'path';
 import authRoutes from './routes/authRoutes';
 import superAdminRoutes from './routes/superAdminRoutes';
 import restaurantRoutes from './routes/restaurantRoutes';
+import { checkDbConnection } from './middlewares/dbMiddleware';
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve Static Uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Database connection check middleware
+app.use('/api', checkDbConnection);
 
 // Routes
 app.use('/api/auth', authRoutes);

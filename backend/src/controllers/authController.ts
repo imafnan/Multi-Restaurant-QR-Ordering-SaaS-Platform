@@ -71,9 +71,13 @@ export const login = async (req: Request, res: Response) => {
         restaurantSlug,
       },
     });
-  } catch (error) {
-    console.error('Login error:', error);
-    return res.status(500).json({ message: 'Server error during login' });
+  } catch (error: any) {
+    console.error('Login error details:', {
+      message: error.message,
+      stack: error.stack,
+      error
+    });
+    return res.status(500).json({ message: 'Unexpected server error during login' });
   }
 };
 
