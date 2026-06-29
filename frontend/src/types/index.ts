@@ -120,6 +120,9 @@ export interface Order {
   items: OrderItem[];
   subtotal: number;
   vat: number;
+  discountAmount?: number;
+  discountNote?: string;
+  originalTotal?: number;
   grandTotal: number;
   status: 'pending' | 'accepted' | 'completed' | 'cancelled';
   createdAt: string;

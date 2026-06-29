@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+@theme {
+  --color-slate-950: var(--slate-950);
+  --color-slate-900: var(--slate-900);
+  --color-slate-850: var(--slate-850);
+  --color-slate-800: var(--slate-800);
+  --color-slate-700: var(--slate-700);
+  --color-slate-600: var(--slate-600);
+  --color-slate-500: var(--slate-500);
+  --color-slate-400: var(--slate-400);
+  --color-slate-300: var(--slate-300);
+  --color-slate-200: var(--slate-200);
+  --color-slate-100: var(--slate-100);
+  --color-white: var(--white);
+}
+
 @layer base {
   :root {
     --background: 222.2 84% 4.9%;
@@ -31,23 +46,404 @@
     --ring: 224.3 76.3% 48%;
 
     --radius: 0.75rem;
+
+    /* Theme color variables */
+    --slate-950: #0b0f19;
+    --slate-900: #121826;
+    --slate-850: #1a2035;
+    --slate-800: #252b45;
+    --slate-700: #475569;
+    --slate-600: #64748b;
+    --slate-500: #94a3b8;
+    --slate-400: #cbd5e1;
+    --slate-300: #e2e8f0;
+    --slate-200: #f1f5f9;
+    --slate-100: #f8fafc;
+    --white: #ffffff;
   }
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--slate-950);
+  color: var(--slate-100);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Glassmorphism styling */
-.glass-card {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+html.light, body.light {
+  --background: 41.5 100% 96.5%; /* HSL for #FFFAED */
+  --foreground: 0 0% 20.8%; /* HSL for #353535 */
+  
+  --border: 41.5 20% 85%;
+  --input: 41.5 20% 85%;
+
+  --slate-950: #FFFAED; /* Light background */
+  --slate-900: #FFFFFF; /* Pure White Card background */
+  --slate-850: #EFE8D8; /* Borders */
+  --slate-800: #D6CEB8; /* Visible borders */
+  --slate-700: #8C8676; /* Muted text */
+  --slate-600: #7C7666;
+  --slate-500: #6C6656;
+  --slate-400: #5C5646; /* Secondary text */
+  --slate-300: #4C4636;
+  --slate-200: #3C3626;
+  --slate-100: #353535; /* Primary text */
+  --white: #353535;      /* Change white text to primary dark text */
+}
+
+/* 1. Global Forms (Inputs, Selects, Textareas) Improvement */
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #353535 !important;
+  border: 1.5px solid #C8BEA7 !important; /* Visible border */
+  border-radius: 12px !important;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  padding-right: 14px !important;
+  padding-left: 14px; /* Default left padding without !important to allow overrides */
+  box-shadow: inset 0 1px 2px rgba(53, 53, 53, 0.02) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #8C8676 !important;
+  opacity: 0.8 !important;
+}
+
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #D97706 !important; /* Amber primary color focus */
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2) !important;
+  background-color: #FFFFFF !important;
+}
+
+/* Specific left padding overrides for inputs with left icons in light mode */
+html.light input.pl-12 {
+  padding-left: 3rem !important;
+}
+html.light input.pl-11 {
+  padding-left: 2.75rem !important;
+}
+html.light input.pl-10 {
+  padding-left: 2.5rem !important;
+}
+
+/* Global input icons vertical centering and alignment fix */
+.relative > svg.absolute,
+.relative > button.absolute > svg,
+.relative > div.absolute > svg {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 0 !important;
+}
+
+/* Design System spacing, sizing and coloring for input icons */
+.relative > svg.absolute,
+.relative > button.absolute > svg,
+.relative > div.absolute > svg {
+  left: 16px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #94A3B8 !important; /* Dark mode icon color */
+}
+
+html.light .relative > svg.absolute,
+html.light .relative > button.absolute > svg,
+html.light .relative > div.absolute > svg {
+  color: #7C7666 !important; /* Light mode icon color */
+}
+
+/* 2. Sidebar Improvement */
+html.light aside {
+  background-color: #FFFDF5 !important; /* Slightly warmer/different than page #FFFAED */
+  border-right: 1px solid #EFE8D8 !important;
+  box-shadow: 2px 0 15px rgba(53, 53, 53, 0.02) !important;
+}
+
+/* Inactive Sidebar Hover and Active button text adjustments */
+html.light aside a:not(.bg-indigo-600):not(.bg-amber-600):hover {
+  background-color: #EFE8D8 !important;
+  color: #353535 !important;
+}
+
+html.light aside a.bg-indigo-600,
+html.light aside a.bg-amber-600 {
+  color: #FFFFFF !important;
+}
+
+/* 3. Header Improvement */
+html.light header {
+  background-color: rgba(255, 250, 237, 0.85) !important; /* Translucent blurred background */
+  border-bottom: 1px solid #EFE8D8 !important;
+  box-shadow: 0 4px 15px rgba(53, 53, 53, 0.02) !important;
+}
+
+/* 4. Table Improvements */
+html.light table {
+  background-color: #FFFFFF !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1px solid #EFE8D8 !important;
+  box-shadow: 0 4px 20px -2px rgba(53, 53, 53, 0.04) !important;
+}
+
+html.light th {
+  background-color: #FFFDF0 !important; /* Slightly darker cream table header */
+  color: #353535 !important;
+  font-weight: 700 !important;
+  border-bottom: 1.5px solid #EFE8D8 !important;
+  padding: 14px 16px !important;
+  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.05em !important;
+}
+
+html.light td {
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #F3EDE0 !important;
+  color: #353535 !important;
+  background-color: #FFFFFF !important;
+}
+
+html.light tr:last-child td {
+  border-bottom: none !important;
+}
+
+html.light tr:hover td {
+  background-color: #FFFDF7 !important; /* Hover row effect */
+}
+
+/* Alternate row shading */
+html.light tr:nth-child(even) td {
+  background-color: #FAF5E8 !important;
+}
+html.light tr:nth-child(even):hover td {
+  background-color: #F7F1E1 !important;
+}
+
+/* 5. Buttons Styling & Animations */
+html.light button.bg-indigo-600,
+html.light button.bg-indigo-500,
+html.light a.bg-indigo-600 {
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html.light button.bg-indigo-600:hover,
+html.light button.bg-indigo-500:hover,
+html.light a.bg-indigo-600:hover {
+  background-color: #4338CA !important;
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+html.light button.bg-indigo-600:active,
+html.light button.bg-indigo-500:active,
+html.light a.bg-indigo-600:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3) !important;
+}
+
+html.light button.bg-amber-500,
+html.light button.bg-amber-600,
+html.light a.bg-amber-500 {
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3) !important;
+  border-radius: 12px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html.light button.bg-amber-500:hover,
+html.light button.bg-amber-600:hover,
+html.light a.bg-amber-500:hover {
+  background-color: #D97706 !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+html.light button.bg-amber-500:active,
+html.light button.bg-amber-600:active,
+html.light a.bg-amber-500:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Inactive button text overrides to remain readable */
+html.light button.border-slate-800 {
+  border-color: #EFE8D8 !important;
+  color: #353535 !important;
+  background-color: #FFFFFF !important;
+}
+html.light button.border-slate-800:hover {
+  background-color: #FAF5E8 !important;
+  border-color: #D6CEB8 !important;
+}
+
+/* 6. Cards & Containers Shadows/Rounding Overrides */
+html.light .bg-slate-900,
+html.light .bg-slate-900\/30,
+html.light .bg-slate-900\/50,
+html.light .bg-slate-900\/60,
+html.light .glass-card {
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  border: 1.5px solid #D6CEB8 !important; /* Visible border */
+  border-radius: 20px !important;
+  box-shadow: 0 10px 25px -5px rgba(83, 76, 56, 0.08), 0 8px 10px -6px rgba(83, 76, 56, 0.06) !important; /* Deeper warm shadow */
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+html.light .bg-slate-900:hover,
+html.light .bg-slate-900\/30:hover,
+html.light .glass-card:hover {
+  box-shadow: 0 20px 35px -5px rgba(83, 76, 56, 0.12), 0 12px 15px -8px rgba(83, 76, 56, 0.08) !important;
+  transform: translateY(-2px);
+}
+
+/* Extra elevation/separation for Dashboard Statistic Cards */
+html.light .grid .bg-slate-900,
+html.light .grid .glass-card {
+  background-color: #FFFFFF !important;
+  border: 1.5px solid #C8BEA7 !important; /* Deeper contrast border */
+  box-shadow: 0 12px 30px -5px rgba(83, 76, 56, 0.1), 0 8px 12px -6px rgba(83, 76, 56, 0.08) !important;
+}
+
+/* Ensure buttons/badges with colored backgrounds keep white text in light mode */
+html.light .bg-indigo-600,
+html.light .bg-indigo-500,
+html.light .bg-amber-600,
+html.light .bg-amber-500,
+html.light .bg-rose-600,
+html.light .bg-rose-500,
+html.light .bg-emerald-600,
+html.light .bg-emerald-500,
+html.light .bg-red-600,
+html.light .bg-red-500,
+html.light .bg-slate-950.text-white-force,
+html.light .text-white-force {
+  --white: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Ensure lucide icons inside colored backgrounds are white */
+html.light .bg-indigo-600 svg,
+html.light .bg-indigo-500 svg,
+html.light .bg-amber-600 svg,
+html.light .bg-amber-500 svg,
+html.light .bg-rose-500 svg,
+html.light .bg-rose-600 svg,
+html.light .bg-emerald-500 svg,
+html.light .bg-emerald-600 svg,
+html.light .bg-red-500 svg,
+html.light .bg-red-600 svg {
+  color: #ffffff !important;
+}
+
+/* 7. Badges (High Visibility, Strong Contrast Badges) */
+html.light .bg-emerald-500\/10,
+html.light .bg-emerald-500\/20 {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  border: 1px solid #A7F3D0 !important;
+  font-weight: 700 !important;
+}
+html.light .text-emerald-400 {
+  color: #047857 !important;
+}
+
+html.light .bg-amber-500\/10,
+html.light .bg-amber-500\/25,
+html.light .bg-amber-500\/20 {
+  background-color: #FEF3C7 !important;
+  color: #92400E !important;
+  border: 1px solid #FDE68A !important;
+  font-weight: 700 !important;
+}
+html.light .text-amber-400,
+html.light .text-amber-500 {
+  color: #B45309 !important;
+}
+
+html.light .bg-rose-500\/10,
+html.light .bg-rose-500\/20,
+html.light .bg-rose-950\/80,
+html.light .bg-red-500\/10,
+html.light .bg-red-500\/20 {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border: 1px solid #FCA5A5 !important;
+  font-weight: 700 !important;
+}
+html.light .text-rose-400,
+html.light .text-rose-500,
+html.light .text-red-400 {
+  color: #B91C1C !important;
+}
+
+html.light .bg-slate-800\/10,
+html.light .bg-slate-800\/20 {
+  background-color: #F3F4F6 !important;
+  color: #374151 !important;
+  border: 1px solid #E5E7EB !important;
+  font-weight: 700 !important;
+}
+
+/* 8. Popups Backdrop Overrides */
+html.light .fixed.inset-0.bg-black\/70,
+html.light .fixed.inset-0.bg-black\/75 {
+  background-color: rgba(53, 53, 53, 0.25) !important; /* Soft gray blur overlay */
+  backdrop-filter: blur(8px) !important;
+}
+
+/* 9. Typography overrides for crisp readability */
+html.light label {
+  color: #5C5646 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+}
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4 {
+  color: #353535 !important;
+}
+html.light p {
+  color: #5C5646 !important;
+}
+
+/* 10. Empty States Overrides */
+html.light .text-center.py-16 {
+  background-color: #FFFFFF !important;
+  border: 1px dashed #D6CEB8 !important;
+  border-radius: 20px !important;
+  padding: 48px !important;
+  color: #8C8676 !important;
+  box-shadow: 0 4px 12px rgba(53, 53, 53, 0.02) !important;
+}
+
+/* Override text gradients in light mode to remain readable and premium */
+html.light .bg-clip-text {
+  background-image: linear-gradient(to right, #353535, #6C6553) !important;
+  color: transparent !important;
+}
+
+/* Override dark login gradients in light mode */
+html.light .bg-gradient-to-br.from-slate-950 {
+  background-image: linear-gradient(to bottom right, #FFFAED, #FFFDF9, #FFF3D6) !important;
 }
 
 /* Custom Scrollbar */
@@ -65,3 +461,33 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* Modal Animations */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

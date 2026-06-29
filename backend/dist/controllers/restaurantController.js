@@ -298,6 +298,8 @@ const deleteProduct = async (req, res) => {
             }
         }
         await Product_1.Product.findByIdAndDelete(id);
+        // Clean up ProductSales records to prevent orphan data
+        await ProductSales_1.ProductSales.deleteMany({ productId: id });
         return res.status(200).json({ message: 'Product deleted successfully' });
     }
     catch (error) {
@@ -437,7 +439,7 @@ exports.clearOrders = clearOrders;
 const updateOrderStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, discountAmount, discountNote } = req.body;
         const restaurantId = req.restaurantId;
         if (!['pending', 'accepted', 'completed', 'cancelled'].includes(status)) {
             return res.status(400).json({ message: 'Invalid order status' });
@@ -447,6 +449,19 @@ const updateOrderStatus = async (req, res) => {
             return res.status(404).json({ message: 'Order not found' });
         }
         const oldStatus = order.status;
+        if (status === 'accepted' && oldStatus === 'pending') {
+            const discount = Number(discountAmount) || 0;
+            if (discount < 0) {
+                return res.status(400).json({ message: 'Discount cannot be negative' });
+            }
+            if (discount > order.subtotal) {
+                return res.status(400).json({ message: 'Discount cannot exceed order subtotal' });
+            }
+            order.discountAmount = discount;
+            order.discountNote = discountNote ? discountNote.trim() : '';
+            order.originalTotal = order.subtotal + order.vat;
+            order.grandTotal = (order.subtotal + order.vat) - discount;
+        }
         order.status = status;
         await order.save();
         // Side effects only when transitioning from pending -> accepted (or completed if needed)

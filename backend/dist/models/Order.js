@@ -19,6 +19,9 @@ const OrderSchema = new mongoose_1.Schema({
     ],
     subtotal: { type: Number, required: true, default: 0 },
     vat: { type: Number, required: true, default: 0 },
+    discountAmount: { type: Number, default: 0 },
+    discountNote: { type: String, default: '' },
+    originalTotal: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true, default: 0 },
     status: { type: String, enum: ['pending', 'accepted', 'completed', 'cancelled'], default: 'pending' },
 }, { timestamps: true });

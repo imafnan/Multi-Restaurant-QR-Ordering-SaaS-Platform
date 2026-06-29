@@ -40,6 +40,12 @@ export const RestaurantOrders: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
+  // Discount Modal State
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [discountAmount, setDiscountAmount] = useState('');
+  const [discountNote, setDiscountNote] = useState('');
+  const [discountError, setDiscountError] = useState<string | null>(null);
+
   // Clear data Modal State
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [clearLoading, setClearLoading] = useState(false);
@@ -127,6 +133,38 @@ export const RestaurantOrders: React.FC = () => {
     }
   };
 
+  const handleAcceptWithDiscount = async (e?: React.FormEvent, skip: boolean = false) => {
+    if (e) e.preventDefault();
+    if (!selectedOrder) return;
+
+    const discountVal = skip ? 0 : Number(discountAmount) || 0;
+    
+    // Validation
+    if (discountVal < 0) {
+      setDiscountError('Discount cannot be negative');
+      return;
+    }
+    if (discountVal > selectedOrder.subtotal) {
+      setDiscountError(`Discount cannot exceed the order subtotal (৳${selectedOrder.subtotal.toFixed(2)})`);
+      return;
+    }
+
+    try {
+      await api.put(`/restaurant/orders/${selectedOrder._id}/status`, {
+        status: 'accepted',
+        discountAmount: discountVal,
+        discountNote: skip ? '' : discountNote
+      });
+      setDiscountModalOpen(false);
+      setDetailModalOpen(false);
+      setSelectedOrder(null);
+      fetchOrders();
+      fetchCounts();
+    } catch (err: any) {
+      setDiscountError(err.response?.data?.message || 'Failed to accept order');
+    }
+  };
+
   const handleClearOrders = async () => {
     setClearLoading(true);
     try {
@@ -181,7 +219,7 @@ export const RestaurantOrders: React.FC = () => {
                   ${item.variantName ? `<br/><span style="font-size: 10px; color: #333;">(${item.variantName})</span>` : ''}
                 </td>
                 <td style="text-align: center; padding: 4px 0; vertical-align: top;">${item.quantity}</td>
-                <td style="text-align: right; padding: 4px 0; vertical-align: top;">$${(item.price * item.quantity).toFixed(2)}</td>
+                <td style="text-align: right; padding: 4px 0; vertical-align: top;">৳${(item.price * item.quantity).toFixed(2)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -189,16 +227,28 @@ export const RestaurantOrders: React.FC = () => {
         <hr style="border: none; border-top: 1px dashed #000; margin: 8px 0;" />
         <div style="display: flex; justify-content: space-between; margin: 4px 0;">
           <span>Subtotal:</span>
-          <span>$${order.subtotal.toFixed(2)}</span>
+          <span>৳${order.subtotal.toFixed(2)}</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin: 4px 0;">
           <span>VAT:</span>
-          <span>$${order.vat.toFixed(2)}</span>
+          <span>৳${order.vat.toFixed(2)}</span>
         </div>
+        ${order.discountAmount !== undefined && order.discountAmount > 0 ? `
+        <div style="display: flex; justify-content: space-between; margin: 4px 0; color: #b91c1c;">
+          <span>Discount:</span>
+          <span>-৳${order.discountAmount.toFixed(2)}</span>
+        </div>
+        ` : ''}
+        <hr style="border: none; border-top: 1px dashed #000; margin: 8px 0;" />
         <div style="display: flex; justify-content: space-between; margin: 6px 0; font-weight: bold; font-size: 13px;">
-          <span>Grand Total:</span>
-          <span>$${order.grandTotal.toFixed(2)}</span>
+          <span>Final Total:</span>
+          <span>৳${order.grandTotal.toFixed(2)}</span>
         </div>
+        ${order.discountNote ? `
+        <div style="font-size: 10px; font-style: italic; margin-top: 4px; text-align: right;">
+          Note: ${order.discountNote}
+        </div>
+        ` : ''}
         <hr style="border: none; border-top: 1px dashed #000; margin: 8px 0;" />
         <div style="text-align: center; margin-top: 10px; font-size: 11px;">
           Thank you for dining with us!<br/>
@@ -366,7 +416,7 @@ export const RestaurantOrders: React.FC = () => {
                           {ord.tableNumber}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-mono font-bold text-slate-200">${ord.grandTotal.toFixed(2)}</td>
+                      <td className="px-6 py-4 font-mono font-bold text-slate-200">৳{ord.grandTotal.toFixed(2)}</td>
                       <td className="px-6 py-4 text-slate-400 text-xs">
                         <div className="flex flex-col">
                           <span>{new Date(ord.createdAt).toLocaleDateString()}</span>
@@ -488,8 +538,8 @@ export const RestaurantOrders: React.FC = () => {
                         )}
                       </div>
                       <div className="flex items-baseline gap-6 font-mono text-right flex-shrink-0">
-                        <span className="text-slate-400">{item.quantity} x ${item.price.toFixed(2)}</span>
-                        <span className="font-bold text-slate-200">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="text-slate-400">{item.quantity} x ৳{item.price.toFixed(2)}</span>
+                        <span className="font-bold text-slate-200">৳{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     </div>
                   ))}
@@ -498,16 +548,27 @@ export const RestaurantOrders: React.FC = () => {
                   <div className="border-t border-slate-900/60 pt-3 mt-2 space-y-1.5 font-mono text-slate-400">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>$${selectedOrder.subtotal.toFixed(2)}</span>
+                      <span>৳{selectedOrder.subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>VAT</span>
-                      <span>$${selectedOrder.vat.toFixed(2)}</span>
+                      <span>৳{selectedOrder.vat.toFixed(2)}</span>
                     </div>
+                    {selectedOrder.discountAmount !== undefined && selectedOrder.discountAmount > 0 && (
+                      <div className="flex justify-between text-rose-400">
+                        <span>Discount</span>
+                        <span>-৳{selectedOrder.discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between border-t border-slate-900/60 pt-2.5 text-sm text-white font-extrabold">
                       <span>Grand Total</span>
-                      <span className="text-amber-500">$${selectedOrder.grandTotal.toFixed(2)}</span>
+                      <span className="text-amber-500">৳{selectedOrder.grandTotal.toFixed(2)}</span>
                     </div>
+                    {selectedOrder.discountNote && (
+                      <div className="text-[10px] text-slate-500 font-sans italic mt-1.5 text-right">
+                        Note: {selectedOrder.discountNote}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -526,7 +587,12 @@ export const RestaurantOrders: React.FC = () => {
               <div className="flex items-center gap-2">
                 {selectedOrder.status === 'pending' && (
                   <button
-                    onClick={() => handleUpdateStatus(selectedOrder._id, 'accepted')}
+                    onClick={() => {
+                      setDiscountAmount('');
+                      setDiscountNote('');
+                      setDiscountError(null);
+                      setDiscountModalOpen(true);
+                    }}
                     className="flex items-center justify-center gap-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-5 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-amber-500/10"
                   >
                     <Check className="w-4 h-4" />
@@ -585,6 +651,94 @@ export const RestaurantOrders: React.FC = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Discount Popup Modal */}
+      {discountModalOpen && selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setDiscountModalOpen(false)} />
+          <div className="relative bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden z-10 glass-card">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/40">
+              <h3 className="font-bold text-white text-sm">Apply Order Discount</h3>
+              <button onClick={() => setDiscountModalOpen(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => handleAcceptWithDiscount(e, false)} className="p-6 space-y-4">
+              
+              {/* Order Total (Read Only) */}
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Order Total (Before Discount)
+                </label>
+                <div className="w-full bg-slate-950/60 border border-slate-850 rounded-xl py-2.5 px-4 text-sm font-bold text-slate-200 font-mono">
+                  ৳{(selectedOrder.subtotal + selectedOrder.vat).toFixed(2)}
+                </div>
+              </div>
+
+              {/* Discount Amount */}
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Discount Amount (৳)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max={selectedOrder.subtotal}
+                  placeholder="e.g. 150"
+                  value={discountAmount}
+                  onChange={(e) => {
+                    setDiscountAmount(e.target.value);
+                    setDiscountError(null);
+                  }}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-amber-500 transition-all font-mono"
+                  autoFocus
+                />
+              </div>
+
+              {/* Optional Note */}
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+                  Optional Note
+                </label>
+                <textarea
+                  placeholder="e.g. Special customer discount or campaign code"
+                  value={discountNote}
+                  onChange={(e) => setDiscountNote(e.target.value)}
+                  rows={2}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-sm text-white focus:outline-none focus:border-amber-500 transition-all font-sans resize-none"
+                />
+              </div>
+
+              {/* Validation Error */}
+              {discountError && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-sans">
+                  {discountError}
+                </div>
+              )}
+
+              {/* Actions Footer */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => handleAcceptWithDiscount(undefined, true)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 text-slate-300 font-semibold text-xs transition-all cursor-pointer"
+                >
+                  Skip Discount
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs transition-all shadow-md shadow-amber-500/10 cursor-pointer"
+                >
+                  Confirm & Accept
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

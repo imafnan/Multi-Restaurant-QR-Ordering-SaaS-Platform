@@ -33,6 +33,11 @@ const login = async (req, res) => {
             if (restaurant.status === 'disabled') {
                 return res.status(403).json({ message: 'Your restaurant is disabled. Dashboard is inaccessible.' });
             }
+            const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+            const isExpired = restaurant.paymentStatus !== 'completed' && new Date() > restaurant.subscriptionExpiryDate;
+            if (!isDev && isExpired) {
+                return res.status(403).json({ message: 'Restaurant subscription has expired or is unpaid' });
+            }
         }
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {

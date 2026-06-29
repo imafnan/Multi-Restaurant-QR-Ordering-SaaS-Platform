@@ -18,7 +18,7 @@ const getPortalData = async (req, res) => {
         const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
         const isExpired = restaurant.paymentStatus !== 'completed' && new Date() > restaurant.subscriptionExpiryDate;
         if (restaurant.status === 'disabled' || (!isDev && isExpired)) {
-            return res.status(403).json({ message: 'Restaurant is temporarily unavailable.' });
+            return res.status(403).json({ message: 'This restaurant is temporarily unavailable.' });
         }
         // Get Active Categories
         const categories = await Category_1.Category.find({ restaurantId: restaurant._id, status: 'active' }).sort({ createdAt: 1 });
@@ -83,7 +83,7 @@ const createCheckoutOrder = async (req, res) => {
         const isDev = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
         const isExpired = restaurant.paymentStatus !== 'completed' && new Date() > restaurant.subscriptionExpiryDate;
         if (restaurant.status === 'disabled' || (!isDev && isExpired)) {
-            return res.status(403).json({ message: 'Restaurant is temporarily unavailable.' });
+            return res.status(403).json({ message: 'This restaurant is temporarily unavailable.' });
         }
         const calculatedItems = [];
         let subtotal = 0;
@@ -161,6 +161,9 @@ const createCheckoutOrder = async (req, res) => {
             items: calculatedItems,
             subtotal,
             vat: vatAmount,
+            discountAmount: 0,
+            discountNote: '',
+            originalTotal: grandTotal,
             grandTotal,
             status: 'pending'
         });

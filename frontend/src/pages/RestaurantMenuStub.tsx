@@ -11,6 +11,9 @@ import {
   Store, 
   Heart,
   ChevronRight,
+  ChevronLeft,
+  Sun,
+  Moon,
   User,
   Phone,
   Calculator,
@@ -19,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Product, Category, Variant } from '../types';
 import { NoticeBox } from '../components/NoticeBox';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface CartItem {
   productId: string;
@@ -52,6 +56,46 @@ export const RestaurantMenuStub: React.FC = () => {
   const [variantModalOpen, setVariantModalOpen] = useState(false);
   const [selectedProductForVariant, setSelectedProductForVariant] = useState<Product | null>(null);
   const [chosenVariant, setChosenVariant] = useState<Variant | null>(null);
+
+  // Theme State
+  const { theme, toggleTheme } = useTheme();
+
+  // Details Modal State
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedProductForDetails, setSelectedProductForDetails] = useState<Product | null>(null);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
+
+  useEffect(() => {
+    setCurrentImgIndex(0);
+  }, [selectedProductForDetails]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    const prod = selectedProductForDetails;
+    if (!prod) return;
+    const galleryImages = prod.images && prod.images.length > 0 ? prod.images : (prod.image ? [prod.image] : []);
+    
+    if (touchStartX - touchEndX > 50) {
+      if (currentImgIndex < galleryImages.length - 1) {
+        setCurrentImgIndex(currentImgIndex + 1);
+      }
+    }
+    if (touchStartX - touchEndX < -50) {
+      if (currentImgIndex > 0) {
+        setCurrentImgIndex(currentImgIndex - 1);
+      }
+    }
+  };
 
   // Checkout Modal State
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -276,6 +320,15 @@ export const RestaurantMenuStub: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-2xl bg-slate-900/60 border border-slate-850 text-slate-400 hover:text-amber-500 hover:bg-slate-900 transition-all cursor-pointer shadow-lg backdrop-blur flex-shrink-0"
+            title="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Super Admin Alert Notification inside menu portal */}
@@ -329,7 +382,11 @@ export const RestaurantMenuStub: React.FC = () => {
                 return (
                   <div 
                     key={prod._id}
-                    className="bg-slate-900/30 border border-slate-900 p-4 rounded-3xl flex items-center justify-between gap-4 backdrop-blur transition-all hover:bg-slate-900/40"
+                    onClick={() => {
+                      setSelectedProductForDetails(prod);
+                      setDetailsModalOpen(true);
+                    }}
+                    className="bg-slate-900/30 border border-slate-900 p-4 rounded-3xl flex items-center justify-between gap-4 backdrop-blur transition-all hover:bg-slate-900/40 cursor-pointer hover:border-amber-500/25"
                   >
                     <div className="space-y-2 flex-grow min-w-0">
                       <div>
@@ -360,7 +417,10 @@ export const RestaurantMenuStub: React.FC = () => {
 
                       {/* Add Button Overlay */}
                       <button
-                        onClick={() => handlePlusClick(prod)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePlusClick(prod);
+                        }}
                         disabled={isOutOfStock}
                         className={`absolute bottom-2 right-2 p-1.5 rounded-xl shadow-lg border transition-all ${
                           isOutOfStock
@@ -404,6 +464,165 @@ export const RestaurantMenuStub: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Product Details Modal */}
+      {detailsModalOpen && selectedProductForDetails && (() => {
+        const prod = selectedProductForDetails;
+        const galleryImages = prod.images && prod.images.length > 0 ? prod.images : (prod.image ? [prod.image] : []);
+        const categoryName = typeof prod.categoryId === 'object' ? prod.categoryId.name : categories.find(c => c._id === prod.categoryId)?.name || 'General';
+        const hasVariants = prod.variants && prod.variants.length > 0;
+        const isOutOfStock = prod.quantity !== undefined && prod.quantity <= 0;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            {/* Backdrop Overlay */}
+            <div 
+              className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300" 
+              onClick={() => setDetailsModalOpen(false)} 
+            />
+            
+            {/* Modal Container */}
+            <div 
+              className="relative bg-slate-900 border border-slate-800 w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 glass-card max-h-[90vh] flex flex-col transform transition-all duration-300 animate-slide-up sm:animate-scale-up"
+            >
+              {/* Image Gallery Section */}
+              <div className="relative w-full aspect-video sm:aspect-square bg-slate-950 overflow-hidden flex-shrink-0 group">
+                {galleryImages.length > 0 ? (
+                  <div 
+                    className="w-full h-full relative"
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                  >
+                    <img 
+                      src={`http://localhost:5000${galleryImages[currentImgIndex]}`} 
+                      alt={prod.name} 
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-slate-950 text-slate-800">
+                    <UtensilsCrossed className="w-16 h-16 animate-pulse" />
+                  </div>
+                )}
+
+                {/* Close Button */}
+                <button 
+                  onClick={() => setDetailsModalOpen(false)} 
+                  className="absolute top-4 right-4 p-2 rounded-full bg-black/60 text-slate-300 hover:text-white transition-all cursor-pointer z-20"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Previous/Next Desktop Chevrons */}
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (currentImgIndex > 0) setCurrentImgIndex(currentImgIndex - 1);
+                      }}
+                      disabled={currentImgIndex === 0}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-all hidden sm:flex cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (currentImgIndex < galleryImages.length - 1) setCurrentImgIndex(currentImgIndex + 1);
+                      }}
+                      disabled={currentImgIndex === galleryImages.length - 1}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/50 text-white hover:bg-black/75 transition-all hidden sm:flex cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+
+                {/* Indicators (Dots) */}
+                {galleryImages.length > 1 && (
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20">
+                    {galleryImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImgIndex(idx)}
+                        className={`w-2 h-2 rounded-full transition-all cursor-pointer ${
+                          idx === currentImgIndex ? 'bg-amber-500 w-4' : 'bg-white/40 hover:bg-white/60'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Product Content Details */}
+              <div className="p-6 overflow-y-auto space-y-4 flex-grow">
+                {/* Category & Stock Status */}
+                <div className="flex items-center justify-between">
+                  <span className="bg-amber-500/10 text-amber-500 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md border border-amber-500/20">
+                    {categoryName}
+                  </span>
+                  {isOutOfStock && (
+                    <span className="bg-rose-500/10 text-rose-500 text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-md border border-rose-500/20">
+                      Out of Stock
+                    </span>
+                  )}
+                </div>
+
+                {/* Name */}
+                <h3 className="text-xl sm:text-2xl font-extrabold text-slate-100 leading-tight">
+                  {prod.name}
+                </h3>
+
+                {/* Price Display */}
+                <div className="flex items-baseline gap-2 font-mono">
+                  {prod.discountPrice !== undefined ? (
+                    <>
+                      <span className="text-xl font-extrabold text-amber-500">${prod.discountPrice.toFixed(2)}</span>
+                      <span className="text-xs text-slate-500 line-through">${prod.price.toFixed(2)}</span>
+                    </>
+                  ) : (
+                    <span className="text-xl font-extrabold text-slate-200">${prod.price.toFixed(2)}</span>
+                  )}
+                </div>
+
+                {/* Description (Supports multi-line) */}
+                <div className="border-t border-slate-800 pt-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Description</h4>
+                  <p className="text-sm text-slate-400 leading-relaxed font-sans whitespace-pre-line">
+                    {prod.description || 'No description available for this delicious item.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Footer */}
+              <div className="p-6 border-t border-slate-800 bg-slate-950/20 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    setDetailsModalOpen(false);
+                    if (hasVariants) {
+                      handlePlusClick(prod);
+                    } else {
+                      handleAddToCart(prod);
+                    }
+                  }}
+                  disabled={isOutOfStock}
+                  className={`w-full py-3 px-6 rounded-2xl font-extrabold text-sm tracking-wide shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    isOutOfStock
+                      ? 'bg-slate-800 text-slate-600 pointer-events-none'
+                      : 'bg-amber-500 hover:bg-amber-600 border border-amber-400 text-slate-950 active:scale-[0.98]'
+                  }`}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  <span>{hasVariants ? 'Customize & Add to Cart' : 'Add to Cart'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Variant Selection Modal (Professional Bottom Sheet / Modal) */}
       {variantModalOpen && selectedProductForVariant && (

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import api from '../api';
 import { 
   LayoutDashboard, 
@@ -12,7 +13,9 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Store
+  Store,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { NoticeBox } from '../components/NoticeBox';
 
@@ -47,6 +50,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, active, onCl
 
 export const RestaurantAdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const { slug } = useParams<{ slug: string }>();
@@ -230,13 +234,24 @@ export const RestaurantAdminLayout: React.FC<{ children: React.ReactNode }> = ({
               {menuItems.find((item) => item.to === location.pathname)?.label || 'Dashboard'}
             </h1>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <div className="text-right hidden sm:block">
-              <p className="font-semibold text-slate-200">{user.name}</p>
-              <p className="text-xs text-slate-500 font-mono">{user.mobile}</p>
-            </div>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-slate-950 shadow-md">
-              {user.name.slice(0, 2).toUpperCase()}
+          <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-slate-400 hover:text-amber-500 hover:bg-slate-900/40 border border-slate-800/40 transition-all cursor-pointer"
+              title="Toggle Theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
+            <div className="flex items-center gap-3 text-sm">
+              <div className="text-right hidden sm:block">
+                <p className="font-semibold text-slate-200">{user.name}</p>
+                <p className="text-xs text-slate-500 font-mono">{user.mobile}</p>
+              </div>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center font-bold text-slate-950 shadow-md">
+                {user.name.slice(0, 2).toUpperCase()}
+              </div>
             </div>
           </div>
         </header>

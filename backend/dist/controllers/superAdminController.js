@@ -10,6 +10,8 @@ const Category_1 = require("../models/Category");
 const Product_1 = require("../models/Product");
 const Order_1 = require("../models/Order");
 const SmsLog_1 = require("../models/SmsLog");
+const DailyAnalytics_1 = require("../models/DailyAnalytics");
+const ProductSales_1 = require("../models/ProductSales");
 const smsService_1 = require("../services/smsService");
 const storageService_1 = require("../services/storageService");
 const slugify_1 = require("../utils/slugify");
@@ -216,6 +218,15 @@ const createRestaurant = async (req, res) => {
             restaurant: newRestaurant._id,
             status: 'active',
         });
+        // Create initial daily analytics for today
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        await DailyAnalytics_1.DailyAnalytics.create({
+            restaurantId: newRestaurant._id,
+            date: startOfToday,
+            sales: 0,
+            ordersCount: 0
+        });
         return res.status(201).json({
             message: 'Restaurant created successfully',
             restaurant: newRestaurant,
@@ -299,6 +310,8 @@ const deleteRestaurant = async (req, res) => {
         await Order_1.Order.deleteMany({ restaurantId: id });
         await User_1.User.deleteMany({ restaurant: id });
         await Alert_1.Alert.deleteMany({ restaurantId: id });
+        await DailyAnalytics_1.DailyAnalytics.deleteMany({ restaurantId: id });
+        await ProductSales_1.ProductSales.deleteMany({ restaurantId: id });
         await Restaurant_1.Restaurant.findByIdAndDelete(id);
         return res.status(200).json({ message: 'Restaurant and all associated data permanently deleted.' });
     }

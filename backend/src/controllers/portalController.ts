@@ -186,6 +186,9 @@ export const createCheckoutOrder = async (req: Request, res: Response) => {
       items: calculatedItems,
       subtotal,
       vat: vatAmount,
+      discountAmount: 0,
+      discountNote: '',
+      originalTotal: grandTotal,
       grandTotal,
       status: 'pending'
     });

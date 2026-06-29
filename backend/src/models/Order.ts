@@ -15,6 +15,9 @@ export interface IOrder extends Document {
   }>;
   subtotal: number;
   vat: number;
+  discountAmount: number;
+  discountNote: string;
+  originalTotal: number;
   grandTotal: number;
   status: 'pending' | 'accepted' | 'completed' | 'cancelled';
   createdAt: Date;
@@ -39,6 +42,9 @@ const OrderSchema = new Schema<IOrder>(
     ],
     subtotal: { type: Number, required: true, default: 0 },
     vat: { type: Number, required: true, default: 0 },
+    discountAmount: { type: Number, default: 0 },
+    discountNote: { type: String, default: '' },
+    originalTotal: { type: Number, default: 0 },
     grandTotal: { type: Number, required: true, default: 0 },
     status: { type: String, enum: ['pending', 'accepted', 'completed', 'cancelled'], default: 'pending' },
   },
